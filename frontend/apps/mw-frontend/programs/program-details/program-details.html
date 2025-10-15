@@ -1,0 +1,16 @@
+<div *ngIf="program$ | async as program" class="program-detail">
+  <button mat-button routerLink="/programs">← Back to Programs</button>
+
+  <h2>{{ program.name }}</h2>
+  <p>{{ program.description }}</p>
+  <p><strong>Dates:</strong> {{ program.startDate }} → {{ program.endDate }}</p>
+
+  <h3>Participants ({{ program.people?.length || 0 }})</h3>
+  <ul>
+    <li *ngFor="let person of program.people">
+      {{ person.firstName }} {{ person.lastName }} ({{ person.email }})
+    </li>
+  </ul>
+
+  <button mat-raised-button (click)="openAssign(program)">Assign / Edit People</button>
+</div>

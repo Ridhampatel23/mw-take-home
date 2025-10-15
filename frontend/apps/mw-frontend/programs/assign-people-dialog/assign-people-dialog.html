@@ -1,0 +1,26 @@
+<h2 mat-dialog-title>Assign people</h2>
+
+<div mat-dialog-content class="list">
+  <ng-container *ngIf="people$ | async as people">
+    <form [formGroup]="form">
+      <!-- IMPORTANT: wrap the ngFor inside formArrayName="checks" -->
+      <div formArrayName="checks">
+        <div *ngFor="let person of people; let i = index; trackBy: trackById" class="row">
+          <mat-checkbox [formControlName]="i">
+            {{ person.firstName }} — {{ person.email }}
+          </mat-checkbox>
+        </div>
+      </div>
+    </form>
+  </ng-container>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-raised-button color="primary" (click)="save()">Save</button>
+</div>
+
+<style>
+  .list { min-width: 420px; max-height: 60vh; overflow: auto; }
+  .row { padding: 6px 0; }
+</style>

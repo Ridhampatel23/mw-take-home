@@ -1,0 +1,44 @@
+<h2 mat-dialog-title>{{ data.mode === 'create' ? 'Add Program' : 'Edit Program' }}</h2>
+
+<div mat-dialog-content class="grid gap-3">
+  <mat-form-field appearance="outline">
+    <mat-label>Name</mat-label>
+    <input matInput [formControl]="form.controls.name" />
+    @if (form.controls.name.invalid) {
+      <mat-error> Name is required</mat-error>
+    }  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Description</mat-label>
+    <input matInput [formControl]="form.controls.description" />
+     @if (form.controls.description.invalid) {
+       <mat-error> Description is required</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Start date (YYYY-MM-DD)</mat-label>
+    <input matInput [matDatepicker]="picker" [formControl]="form.controls.startDate">
+    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+    @if (form.controls.startDate.invalid) {
+      <mat-error> Start Date is required</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>End date (YYYY-MM-DD)</mat-label>
+    <input matInput [matDatepicker]="picker2" [formControl]="form.controls.endDate">
+    <mat-datepicker-toggle matIconSuffix [for]="picker2"></mat-datepicker-toggle>
+    <mat-datepicker #picker2></mat-datepicker>
+    @if (form.controls.endDate.invalid) {
+      <mat-error> End Date is required</mat-error>
+    }  </mat-form-field>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-raised-button color="primary" (click)="submit()">Save</button>
+</div>
+
+<style>.grid{display:grid}.gap-3{gap:12px}</style>

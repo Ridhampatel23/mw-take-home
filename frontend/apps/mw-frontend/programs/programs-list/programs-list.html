@@ -1,0 +1,31 @@
+<div class="toolbar">
+  <button mat-raised-button color="primary" (click)="openCreate()">Add Program</button>
+</div>
+
+<table class="mw-table">
+  <thead>
+  <tr>
+    <th>Name</th>
+    <th>Description</th>
+    <th>Dates</th>
+    <th>People</th>
+    <th>Actions</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let p of programs$ | async">
+    <td>
+      <!-- Clickable name goes to details -->
+      <a [routerLink]="['/programs', p.id]">{{ p.name }}</a>
+    </td>
+    <td>{{ p.description }}</td>
+    <td>{{ p.startDate }} → {{ p.endDate }}</td>
+    <td>{{ p.peopleCount ?? 0 }}</td>
+    <td class="actions">
+      <button mat-button (click)="openEdit(p)">Edit</button>
+      <button mat-button (click)="openAssign(p)">Assign people</button>
+      <button mat-button color="warn" (click)="remove(p)">Delete</button>
+    </td>
+  </tr>
+  </tbody>
+</table>

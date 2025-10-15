@@ -1,0 +1,60 @@
+
+<a mat-button routerLink="programs"><mat-icon>event</mat-icon>&nbsp;Programs</a>
+
+<mat-toolbar color="primary">
+  <span>People</span>
+  <span class="spacer"></span>
+  <button mat-raised-button color="accent" (click)="openCreate()">
+    <mat-icon>person_add</mat-icon>&nbsp;Add
+  </button>
+</mat-toolbar>
+
+<div class="content">
+  <mat-form-field appearance="outline" class="w-full">
+    <mat-label>Search</mat-label>
+    <input matInput [value]="store.filterValue" (input)="onFilterInput($event)" placeholder="name / email / role" />
+  </mat-form-field>
+
+  <div class="loading" *ngIf="store.loading()"><mat-spinner diameter="40"></mat-spinner></div>
+  <div class="error" *ngIf="store.error()">{{ store.error() }}</div>
+
+  <table mat-table [dataSource]="store.people()" class="mat-elevation-z1">
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>Name</th>
+      <td mat-cell *matCellDef="let p">{{ p.firstName }} {{ p.lastName }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="email">
+      <th mat-header-cell *matHeaderCellDef>Email</th>
+      <td mat-cell *matCellDef="let p">{{ p.email }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="role">
+      <th mat-header-cell *matHeaderCellDef>Role</th>
+      <td mat-cell *matCellDef="let p">{{ p.role }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let p" class="actions">
+        <button mat-icon-button (click)="openEdit(p)" aria-label="Edit">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" (click)="remove(p.id)" aria-label="Delete">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayed"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayed;"></tr>
+  </table>
+</div>
+
+<style>
+  .spacer { flex: 1 1 auto; }
+  .content { padding: 16px; display: grid; gap: 12px; }
+  .actions { text-align: right; }
+  .w-full { width: 100%; }
+  .loading { display: flex; justify-content: center; padding: 24px; }
+</style>
