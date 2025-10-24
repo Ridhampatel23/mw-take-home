@@ -1,4 +1,3 @@
-// apps/mw-frontend/src/app/programs/programs-data.service.ts
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Programs, CreateProgram, UpdateProgram } from '../../models';
@@ -14,6 +13,14 @@ export class ProgramsDataService {
   list() {
     return this.http.get<Programs[]>(`${API}/programs`);
   }
+
+  upsertAssignments(programId: string, personIds: string[]) {
+    return this.http.put<{ added: string[]; removed: string[] }>(
+      `${API}/programs/${programId}/assignments`,
+      { personIds }
+    );
+  }
+
 
   /** Gets a program by ID.
    * @param id The ID of the program.
@@ -45,10 +52,17 @@ export class ProgramsDataService {
     return this.http.delete<void>(`${API}/programs/${id}`);
   }
 
-  // assignment
+  /** Assign people to a program. */
   assign(programId: string, personIds: string[]) {
     return this.http.post(`${API}/programs/${programId}/assign`, { personIds });
   }
+
+  getAssignedIds(programId: string) {
+    return this.http.get<string[]>(`${API}/programs/${programId}/people/ids`);
+  }
+
+
+  /** Remove a single person from a program*/
   remove(programId: string, personId: string) {
     return this.http.delete(`${API}/programs/${programId}/remove/${personId}`);
   }

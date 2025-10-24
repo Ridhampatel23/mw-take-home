@@ -1,74 +1,81 @@
-import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
-import type {
-  CreateProgram as ProgramCreate,
-  Programs,
-  UpdateProgram,
-} from '../../models';
-import { environment } from '../../../../env';
+// apps/mw-frontend/src/app/services/programs/programs-store.ts
+import { Injectable, inject, signal, effect, computed } from '@angular/core';
+import { ProgramsDataService } from './programs-data';
+import type { Programs, CreateProgram as ProgramCreate, UpdateProgram } from '../../models';
 
 @Injectable({ providedIn: 'root' })
 export class ProgramsStoreService {
-  private http = inject(HttpClient);
-  private readonly base = environment.apiUrl;
+  private readonly api = inject(ProgramsDataService);
+
+  // Signals (no BehaviorSubjects)
+  private readonly _programs = signal<Programs[]>([]);
+  private readonly _loading  = signal<boolean>(false);
+  private readonly _error    = signal<string | null>(null);
+
+  // Public readonly getters (so callers can’t set them)
+  readonly programs = this._programs.asReadonly();
+  readonly loading  = this._loading.asReadonly();
+  readonly error    = this._error.asReadonly();
 
 
-  private _programs = new BehaviorSubject<Programs[]>([]);
-  programs$ = this._programs.asObservable();
-
-  // auto-load so lists populate without remembering to call load() elsewhere
   constructor() {
+    // initial load
     this.load();
   }
 
- /** Get only the assigned person IDs for a program. */
-  getAssignedIds$(programId: string) {
-        return this.http.get<string[]>(`${this.base}/programs/${programId}/people/ids`);
-      }
-
-  /** Assign and then refresh programs list (same as before). */
-  assignPeople(programId: string, personIds: string[], done?: () => void) {
-        this.http.post(`${this.base}/programs/${programId}/assign`, { personIds })
-          .subscribe({
-              next: () => { this.load(); done?.(); },
-              error: (e) => { console.error('Assign people failed', e); done?.(); },
-            });
-      }
-
+  // Imperative load that updates signals
   load() {
-    this.http.get<Programs[]>(`${this.base}/programs`).subscribe({
-      next: (list) => this._programs.next(list),
-      error: (err) => console.error('Failed to load programs', err),
+    this._loading.set(true);
+    this.api.list().subscribe({
+      next: (list) => this._programs.set(list ?? []),
+      error: (e) => this._error.set(e?.error?.message ?? 'Failed to load programs'),
+      complete: () => this._loading.set(false),
     });
   }
 
+
   getById$(id: string) {
-    return this.http.get<Programs>(`${this.base}/programs/${id}`);
+    return this.api.get(id);
   }
 
+  getAssignedIds$(programId: string) {
+    return this.api.getAssignedIds(programId);
+  }
+
+  // Bulk set  (V2)
+  setAssignments(programId: string, personIds: string[], done?: () => void) {
+    this.api.upsertAssignments(programId, personIds).subscribe({
+      next: () => { this.load(); done?.(); },
+      error: (e) => { console.error('Set assignments failed', e); done?.(); },
+    });
+  }
+
+  // Legacy single-call assign (optional to keep) (V1)
+  assignPeople(programId: string, personIds: string[], done?: () => void) {
+    this.api.assign(programId, personIds).subscribe({
+      next: () => { this.load(); done?.(); },
+      error: (e) => { console.error('Assign failed', e); done?.(); },
+    });
+  }
 
   create(dto: ProgramCreate, done?: () => void) {
-    this.http.post<Programs>(`${this.base}/programs`, dto).subscribe({
+    this.api.create(dto).subscribe({
       next: () => { this.load(); done?.(); },
       error: (e) => { console.error('Create failed', e); done?.(); },
     });
   }
 
   update(id: string, dto: UpdateProgram, done?: () => void) {
-    this.http.put<Programs>(`${this.base}/programs/${id}`, dto).subscribe({
+    this.api.update(id, dto).subscribe({
       next: () => { this.load(); done?.(); },
       error: (e) => { console.error('Update failed', e); done?.(); },
     });
   }
 
   delete(id: string) {
-    this.http.delete(`${this.base}/programs/${id}`).subscribe({
+    this.api.delete(id).subscribe({
       next: () => this.load(),
       error: (e) => console.error('Delete failed', e),
     });
   }
-
-
 }
-

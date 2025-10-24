@@ -1,0 +1,15 @@
+.mw-table {
+  border-collapse: separate;
+}
+
+
+.mw-table tr {
+  border-bottom: 1px solid black;
+  padding-right: 12px;
+}
+
+.mw-table td {
+  padding: 12px 8px;
+  border: 1px solid black;
+}
+

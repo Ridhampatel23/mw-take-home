@@ -46,6 +46,52 @@ public class ProgramsService
     await _db.SaveChangesAsync();
     return true;
   }
+  
+  public async Task<(IReadOnlyList<Guid> added, IReadOnlyList<Guid> removed)> SetAssignmentsAsync(Guid programId, AssignPeopleRequest req)
+  {
+    // Normalize input
+    var incoming = (req?.PersonIds ?? new()).Distinct().ToHashSet();
+
+    // Ensure program exists
+    var programExists = await _db.Programs.AnyAsync(p => p.Id == programId);
+    if (!programExists) throw new KeyNotFoundException("Program not found");
+
+    // Current assignments
+    var current = await _db.ProgramAssignments
+      .Where(pa => pa.ProgramId == programId)
+      .Select(pa => pa.PersonId)
+      .ToListAsync();
+    var currentSet = current.ToHashSet();
+
+    // Diff
+    var toAdd = incoming.Except(currentSet).ToList();
+    var toRemove = currentSet.Except(incoming).ToList();
+
+    // Add new links
+    if (toAdd.Count > 0)
+    {
+      var rows = toAdd.Select(pid => new ProgramAssignment
+      {
+        ProgramId = programId,
+        PersonId  = pid,
+        AssignedAt = DateTime.UtcNow
+      });
+      await _db.ProgramAssignments.AddRangeAsync(rows);
+    }
+
+    // Remove missing links
+    if (toRemove.Count > 0)
+    {
+      var del = await _db.ProgramAssignments
+        .Where(pa => pa.ProgramId == programId && toRemove.Contains(pa.PersonId))
+        .ToListAsync();
+      _db.ProgramAssignments.RemoveRange(del);
+    }
+
+    await _db.SaveChangesAsync();
+    return (toAdd, toRemove);
+  }
+
 
   public async Task<AssignResultResponse> AssignPeopleAsync(Guid programId, AssignPeopleRequest req)
   {

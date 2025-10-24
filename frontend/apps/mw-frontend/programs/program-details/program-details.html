@@ -5,7 +5,7 @@
   <p>{{ program.description }}</p>
   <p><strong>Dates:</strong> {{ program.startDate }} → {{ program.endDate }}</p>
 
-  <h3>Participants ({{ program.people?.length || 0 }})</h3>
+  <h3>Participants ({{ assignedPeopleCount() }})</h3>
   <ul>
     <li *ngFor="let person of program.people">
       {{ person.firstName }} {{ person.lastName }} ({{ person.email }})

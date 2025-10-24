@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Assign people</h2>
+<h2 class="heading" mat-dialog-title>Assign people</h2>
 
 <div mat-dialog-content class="list">
   <ng-container *ngIf="people$ | async as people">
@@ -21,6 +21,8 @@
 </div>
 
 <style>
-  .list { min-width: 420px; max-height: 60vh; overflow: auto; }
+  .heading { margin-left: 18px; }
+  .list { min-width: 420px; max-height: 50vh; overflow: auto; margin-left: 12px; }
   .row { padding: 6px 0; }
+  button { margin-right: 12px; margin-bottom: 12px; }
 </style>
